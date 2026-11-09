@@ -1,0 +1,19 @@
+{
+  "label": "MLP · 2 couches",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "sample_hz": 30,
+  "learning_rate": 0.0003,
+  "epochs": 500,
+  "training_trajectories": 162,
+  "training_coverage": {
+    "method": "fixed_sampling",
+    "ranges": {
+      "l": [1.0, 1.5, 2.0],
+      "m": [1.0, 1.5, 2.0],
+      "b": [0.1, 0.2, 0.3],
+      "theta0": [-1.5707963267948966, 1.5707963267948966],
+      "omega0": [0.0, 0.5, 1.0]
+    }
+  }
+}
