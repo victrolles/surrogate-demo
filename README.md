@@ -25,7 +25,7 @@ npm run build
 | Mode | Réglages | Affichage |
 | --- | --- | --- |
 | Simulation physique | Curseurs pour la durée, L, m, b, θ₀ et ω₀ | θ(t), ω(t) et pendule animé |
-| Inférence IA | Modèle et hyperparamètres. Scénario de référence fixe de 10 s, affiché dans le panneau | Trajectoire prédite et pendule animé |
+| Inférence IA | Curseurs pour la durée, L, m, b, θ₀ et ω₀. Modèle et hyperparamètres | Trajectoire prédite et pendule animé |
 | Comparaison | Modèle et curseurs communs aux deux trajectoires | Courbes et pendules superposés, IA en bleu et physique en orange pointillé. Erreurs moyennes absolues cumulées |
 
 ## Architecture
@@ -43,7 +43,7 @@ Pour ajouter un modèle compatible, crée `models/<identifiant>/` avec un `model
 
 ## Couverture du dataset
 
-Le badge s’applique aux cinq paramètres physiques du scénario sélectionné. Les préréglages « Bon accord » et « Forte divergence » dans Comparaison chargent deux scénarios de 10 s évalués avec les checkpoints fournis.
+Le badge s’applique aux cinq paramètres physiques du scénario sélectionné. Les préréglages « Bon accord » et « Forte divergence » dans Inférence IA et Comparaison chargent deux scénarios de 10 s évalués avec les checkpoints fournis.
 
 Pour documenter un checkpoint, ajoute `training_coverage` à son `model.json`. Indique `method` et les `ranges` pour `l`, `m`, `b`, `theta0` et `omega0`, en reprenant la configuration qui a réellement servi à générer son dataset.
 

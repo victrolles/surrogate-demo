@@ -28,7 +28,7 @@ const sliders: { key: keyof Parameters; label: string; unit: string; min: number
   { key: 'omega0', label: 'Vitesse initiale ω₀', unit: 'rad/s', min: -4, max: 4, step: 0.05 },
 ]
 
-const comparisonPresets: { label: string; parameters: Parameters }[] = [
+const scenarioPresets: { label: string; parameters: Parameters }[] = [
   {
     label: 'Bon accord',
     parameters: { duration: 10, l: 2, m: 1.5, b: 0.3, theta0: -Math.PI / 2, omega0: 1 },
@@ -123,8 +123,8 @@ export default function App() {
 
   const selectedModel = models?.find(model => model.id === modelId) ?? models?.[0]
   const frame = trajectory.frames.at(-1)
-  const inputs = mode === 'inference' ? defaults : parameters
-  const displayedInputs = trajectory.run ?? inputs
+  const usesModel = mode !== 'simulation'
+  const displayedInputs = trajectory.run ?? parameters
   const series: Series[] = mode === 'comparison'
     ? ['inference', 'simulation']
     : [mode === 'simulation' ? 'simulation' : 'inference']
@@ -160,18 +160,19 @@ export default function App() {
         </div>
       </div>
 
-      <div className="dashboard">
+      <div className={usesModel ? 'dashboard with-model' : 'dashboard'}>
         <aside className="panel controls">
           <form onSubmit={event => {
             event.preventDefault()
-            trajectory.start({ ...inputs, mode, model_id: mode === 'simulation' ? undefined : selectedModel?.id })
+            if (trajectory.busy || (usesModel && !selectedModel)) return
+            trajectory.start({ ...parameters, mode, model_id: usesModel ? selectedModel?.id : undefined })
           }}>
-            {mode !== 'inference' && <fieldset disabled={trajectory.busy}>
+            <fieldset disabled={trajectory.busy}>
               <legend>Paramètres physiques</legend>
-              {mode === 'comparison' && <div className="scenario-picker">
+              {usesModel && <div className="scenario-picker">
                 <span>Exemples avec les modèles fournis</span>
                 <div>
-                  {comparisonPresets.map(preset => <button key={preset.label} className="secondary" type="button"
+                  {scenarioPresets.map(preset => <button key={preset.label} className="secondary" type="button"
                     onClick={() => { setParameters(preset.parameters); trajectory.reset() }}>
                     {preset.label}
                   </button>)}
@@ -193,47 +194,44 @@ export default function App() {
                 <option value="-1.57" label="−π/2" />
                 <option value="1.57" label="π/2" />
               </datalist>
-            </fieldset>}
-
-            {mode !== 'simulation' && <fieldset disabled={trajectory.busy}>
-              <legend>Modèle surrogate</legend>
-              {selectedModel ? <>
-                <label className="model-select">Checkpoint
-                  <select value={selectedModel.id} onChange={event => setModelId(event.target.value)}>
-                    {models?.map(model => <option value={model.id} key={model.id}>{model.label}</option>)}
-                  </select>
-                </label>
-                <CoverageBadge model={selectedModel} parameters={inputs} />
-                <ModelDetails model={selectedModel} />
-              </> : <>
-                <p className="help" role="status">
-                  {catalogError || (models ? 'Aucun checkpoint disponible.' : 'Chargement des modèles…')}
-                </p>
-                {(catalogError || models) && <button className="secondary" type="button" onClick={() => {
-                  setCatalogError('')
-                  setModels(null)
-                  setCatalogVersion(value => value + 1)
-                }}>Actualiser le catalogue</button>}
-              </>}
-              {mode === 'inference' && <div className="preset">
-                <strong>Scénario de référence</strong>
-                <span>10 s · L 1 m · m 1 kg · b 0,1 kg/s</span>
-                <span>θ₀ {formatParameter('theta0', defaults.theta0)} rad · ω₀ 0 rad/s</span>
-              </div>}
-            </fieldset>}
+            </fieldset>
 
             <div className="actions">
               {trajectory.busy
                 ? <button type="button" className="secondary" onClick={trajectory.stop}
                     disabled={trajectory.status === 'stopping'}>Arrêter</button>
                 : <button type="submit" className="primary"
-                    disabled={mode !== 'simulation' && !selectedModel}>{trajectory.run ? 'Relancer' : 'Lancer'}</button>}
-              {mode !== 'inference' && <button type="button" className="secondary" disabled={trajectory.busy}
-                onClick={() => { setParameters(defaults); trajectory.reset() }}>Réinitialiser</button>}
+                    disabled={usesModel && !selectedModel}>{trajectory.run ? 'Relancer' : 'Lancer'}</button>}
+              <button type="button" className="secondary" disabled={trajectory.busy}
+                onClick={() => { setParameters(defaults); trajectory.reset() }}>Réinitialiser</button>
             </div>
             {trajectory.error && <p className="error" role="alert">{trajectory.error}</p>}
           </form>
         </aside>
+
+        {usesModel && <aside className="panel controls model-panel" aria-label="Modèle surrogate">
+          <fieldset disabled={trajectory.busy}>
+            <legend>Modèle surrogate</legend>
+            {selectedModel ? <>
+              <label className="model-select">Checkpoint
+                <select value={selectedModel.id} onChange={event => setModelId(event.target.value)}>
+                  {models?.map(model => <option value={model.id} key={model.id}>{model.label}</option>)}
+                </select>
+              </label>
+              <CoverageBadge model={selectedModel} parameters={parameters} />
+              <ModelDetails model={selectedModel} />
+            </> : <>
+              <p className="help" role="status">
+                {catalogError || (models ? 'Aucun checkpoint disponible.' : 'Chargement des modèles…')}
+              </p>
+              {(catalogError || models) && <button className="secondary" type="button" onClick={() => {
+                setCatalogError('')
+                setModels(null)
+                setCatalogVersion(value => value + 1)
+              }}>Actualiser le catalogue</button>}
+            </>}
+          </fieldset>
+        </aside>}
 
         <div className="viewer">
           <div className="viewer-bar">
