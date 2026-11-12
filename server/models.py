@@ -61,7 +61,9 @@ def discover_models():
         if weights.is_file():
             info = ModelInfo(id=metadata.parent.name, **json.loads(metadata.read_text(encoding="utf-8")))
             models[info.id] = Checkpoint(info, weights)
-    return models
+    return dict(sorted(models.items(), key=lambda item: (
+        item[1].info.training_trajectories, item[1].info.num_hidden_layers, item[0]
+    )))
 
 
 class Rollout:

@@ -1,3 +1,4 @@
+from math import pi
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -12,7 +13,7 @@ class RunRequest(BaseModel):
     l: float = Field(default=1.0, ge=0.25, le=3)
     m: float = Field(default=1.0, ge=0.25, le=3)
     b: float = Field(default=0.1, ge=0, le=1)
-    theta0: float = Field(default=1.57, ge=-3.14, le=3.14)
+    theta0: float = Field(default=1.57, ge=-pi, le=pi)
     omega0: float = Field(default=0, ge=-4, le=4)
 
     @model_validator(mode="after")

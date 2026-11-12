@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import os
 from contextlib import suppress
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
 
@@ -12,6 +14,25 @@ from .trajectory import Trajectory
 
 app = FastAPI(title="Surrogate Demo")
 logger = logging.getLogger(__name__)
+allowed_origins = [
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "https://surrogate-demo-chi.vercel.app",
+    "https://surrogate-demo.victorgoudal.fr",
+    *(
+        origin.strip().rstrip("/")
+        for origin in os.environ.get("SURROGATE_CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ),
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+trajectory_slots = asyncio.Semaphore(4)
 
 
 @app.get("/health")
@@ -53,7 +74,21 @@ async def stream(socket: WebSocket, trajectory: Trajectory, stop: asyncio.Event)
 
 @app.websocket("/trajectory")
 async def trajectory_socket(socket: WebSocket):
+    if socket.headers.get("origin") not in allowed_origins:
+        await socket.close(code=1008)
+        return
+
     await socket.accept()
+    if trajectory_slots.locked():
+        await socket.send_json({"type": "error", "message": "Le serveur est occupé. Réessaie dans quelques secondes."})
+        await socket.close(code=1013)
+        return
+
+    async with trajectory_slots:
+        await run_trajectory(socket)
+
+
+async def run_trajectory(socket: WebSocket):
     listener = None
     try:
         try:

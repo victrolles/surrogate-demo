@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { apiUrl } from './api'
 
 export type Mode = 'simulation' | 'inference' | 'comparison'
 
@@ -81,7 +82,7 @@ export function useTrajectory() {
     reset()
     setRun(request)
     setStatus('connecting')
-    const endpoint = new URL('/api/trajectory', window.location.href)
+    const endpoint = apiUrl('/trajectory')
     endpoint.protocol = endpoint.protocol === 'https:' ? 'wss:' : 'ws:'
     const connection = new WebSocket(endpoint)
     socket.current = connection

@@ -12,6 +12,9 @@ export function formatParameter(key: keyof Parameters, value: number) {
   if (key === 'theta0' && Math.abs(value) === Math.PI / 2) {
     return value < 0 ? '−π/2' : 'π/2'
   }
+  if (key === 'theta0' && Math.abs(value) === Math.PI) {
+    return value < 0 ? '−π' : 'π'
+  }
   return value.toLocaleString('fr-FR', { maximumFractionDigits: 4 })
 }
 

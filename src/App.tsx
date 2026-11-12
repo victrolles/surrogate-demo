@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiUrl } from './api'
 import { describeIssue, formatParameter, getCoverage } from './coverage'
 import { Legend, PendulumPlot, TimePlot } from './Plots'
 import { defaults, useTrajectory } from './trajectory'
@@ -108,7 +109,7 @@ export default function App() {
     const controller = new AbortController()
     async function loadModels() {
       try {
-        const response = await fetch('/api/models', {
+        const response = await fetch(apiUrl('/models'), {
           signal: AbortSignal.any([controller.signal, AbortSignal.timeout(5000)]),
         })
         if (!response.ok) throw new Error()
@@ -170,7 +171,7 @@ export default function App() {
             <fieldset disabled={trajectory.busy}>
               <legend>Paramètres physiques</legend>
               {usesModel && <div className="scenario-picker">
-                <span>Exemples avec les modèles fournis</span>
+                <span>Exemples évalués avec les MLP Small</span>
                 <div>
                   {scenarioPresets.map(preset => <button key={preset.label} className="secondary" type="button"
                     onClick={() => { setParameters(preset.parameters); trajectory.reset() }}>
@@ -185,14 +186,19 @@ export default function App() {
                   aria-valuetext={formatParameter(key, parameters[key]) + ' ' + unit}
                   list={key === 'theta0' ? 'angle-grid' : undefined}
                   onChange={event => {
-                    const value = event.target.valueAsNumber
-                    const angleGridPoint = key === 'theta0' && Math.abs(value) === 1.57
-                    setParameters({ ...parameters, [key]: angleGridPoint ? Math.sign(value) * Math.PI / 2 : value })
+                    let value = event.target.valueAsNumber
+                    if (key === 'theta0') {
+                      if (Math.abs(value) === 1.57) value = Math.sign(value) * Math.PI / 2
+                      if (Math.abs(value) === max) value = Math.sign(value) * Math.PI
+                    }
+                    setParameters({ ...parameters, [key]: value })
                   }} />
               </label>)}
               <datalist id="angle-grid">
+                <option value="-3.14" label="−π" />
                 <option value="-1.57" label="−π/2" />
                 <option value="1.57" label="π/2" />
+                <option value="3.14" label="π" />
               </datalist>
             </fieldset>
 

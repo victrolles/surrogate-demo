@@ -1,0 +1,19 @@
+{
+  "label": "MLP Medium · 2 couches",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "sample_hz": 30,
+  "learning_rate": 0.001,
+  "epochs": 100,
+  "training_trajectories": 9702,
+  "training_coverage": {
+    "method": "fixed_sampling",
+    "ranges": {
+      "l": [0.25, 0.5, 1, 1.5, 2, 2.5, 3],
+      "m": [0.25, 0.5, 1, 1.5, 2, 2.5, 3],
+      "b": [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      "theta0": [-3.141592653589793, 3.141592653589793],
+      "omega0": [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+    }
+  }
+}

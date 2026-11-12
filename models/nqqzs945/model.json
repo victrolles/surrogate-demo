@@ -1,5 +1,5 @@
 {
-  "label": "MLP · 2 couches",
+  "label": "MLP Small · 2 couches",
   "hidden_size": 64,
   "num_hidden_layers": 2,
   "sample_hz": 30,

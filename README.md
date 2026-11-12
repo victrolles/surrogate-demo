@@ -37,13 +37,20 @@ npm run build
 
 ## Checkpoints
 
-Les deux checkpoints fournis proviennent de `pendulum-surrogate/runs/7vv6mwx6` et `pendulum-surrogate/runs/nqqzs945`. Ils ont été entraînés à 30 Hz sur le même jeu de 162 trajectoires avec plusieurs longueurs, masses et valeurs d’amortissement. Les curseurs permettent aussi d’explorer en dehors de ce domaine d’entraînement.
+Les modèles sont entraînés à 30 Hz. Small et Medium désignent la taille du dataset. Les quatre réseaux ont une largeur de 64 neurones par couche cachée.
+
+| Famille | Trajectoires d’entraînement | 1 couche cachée | 2 couches cachées |
+| --- | ---: | --- | --- |
+| MLP Small | 162 | `7vv6mwx6` | `nqqzs945` |
+| MLP Medium | 9 702 | `h8u6xyth` | `8za4e0nn` |
+
+Les poids Small proviennent de `pendulum-surrogate/runs/` et les poids Medium de `pendulum-surrogate/saved_runs/`.
 
 Pour ajouter un modèle compatible, crée `models/<identifiant>/` avec un `model.pth` contenant le `state_dict` de `PendulumModel` et un `model.json` basé sur l’un des exemples fournis. Indique la largeur, le nombre de couches et la fréquence réellement utilisés à l’entraînement. Recharge ensuite la page pour actualiser la liste.
 
 ## Couverture du dataset
 
-Le badge s’applique aux cinq paramètres physiques du scénario sélectionné. Les préréglages « Bon accord » et « Forte divergence » dans Inférence IA et Comparaison chargent deux scénarios de 10 s évalués avec les checkpoints fournis.
+Le badge s’applique aux cinq paramètres physiques du scénario sélectionné. Les préréglages « Bon accord » et « Forte divergence » dans Inférence IA et Comparaison chargent deux scénarios de 10 s évalués avec les deux checkpoints Small.
 
 Pour documenter un checkpoint, ajoute `training_coverage` à son `model.json`. Indique `method` et les `ranges` pour `l`, `m`, `b`, `theta0` et `omega0`, en reprenant la configuration qui a réellement servi à générer son dataset.
 
@@ -51,4 +58,8 @@ Pour documenter un checkpoint, ajoute `training_coverage` à son `model.json`. I
 - `random_sampling` accepte une valeur fixe ou une paire de bornes inclusives par paramètre. Le badge indique si le scénario respecte les plages de tirage.
 - Si ces métadonnées sont absentes, le badge affiche « Couverture inconnue ».
 
-Les poids PyTorch et le dataset restent indépendants de ces métadonnées. Le badge décrit le scénario initial. La précision se mesure sur les trajectoires.
+Le badge décrit le scénario initial. La précision se mesure sur les trajectoires.
+
+## Déploiement
+
+Le [guide de déploiement](docs/deployment.md) détaille le démarrage de FastAPI sur une tour Windows, la route Cloudflare et la configuration du frontend Vite sur Vercel.
